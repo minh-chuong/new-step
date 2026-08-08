@@ -1,6 +1,6 @@
 /**
  * About Section
- * Bio, extended description, and 3D Avatar (Standing Pointing) with floating glass cards.
+ * Bio, extended description, and 3D Avatar (Standing Pointing - Full Body) with floating glass cards.
  */
 
 import { motion } from 'framer-motion';
@@ -16,9 +16,9 @@ import { ThreeScene } from '../../three/ThreeScene';
 // ── 3D Column for About (Standing Pointing + Floating UI Overlays) ─────────────
 function About3DColumn() {
   return (
-    <div className="relative w-full max-w-[480px] h-[520px] mx-auto">
-      {/* 3D character - standing pointing animation */}
-      <ThreeScene animationState="point" height="520px" />
+    <div className="relative w-full max-w-[480px] h-[560px] mx-auto">
+      {/* 3D character - standing pointing animation (full body) */}
+      <ThreeScene animationState="point" height="560px" />
 
       {/* Floating glass card overlay - Design Philosophy */}
       <motion.div

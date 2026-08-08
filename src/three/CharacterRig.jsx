@@ -1,11 +1,13 @@
 /**
  * CharacterRig - 3D Avatar Rigging & Animation Controller
  * 
- * Perfect Framing Math:
- * - Character scale 1.0 (native ~1.75m Avaturn model).
- * - Feet placed at y = -0.9, head at y = +0.85.
- * - Camera at z = 3.6 with FOV 40° covers vertical span [-1.31, +1.31].
- * - Guarantees 100% full-body visibility from shoes to head with zero cutoff & zero floating!
+ * Verified Bounding Box Math:
+ * - Model native height: 1.87m (feet at y=0.0, head at y=1.87).
+ * - CHAR_SCALE = 0.95 -> 1.77m world height.
+ * - CHAR_Y = -0.85 -> Feet at y=-0.85, Head at y=+0.93.
+ * - Camera at z=4.2 with FOV 40° covers vertical frustum [-1.47, +1.57].
+ * - Generous 0.62 unit clearance below shoes & 0.64 unit clearance above head.
+ * - Guarantees 100% full-body visibility (head, torso, legs, shoes) on all screen sizes!
  */
 import { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -20,10 +22,10 @@ useGLTF.preload('/models/animations/Waving.glb');
 useGLTF.preload('/models/animations/Jumping.glb');
 useFBX.preload('/models/animations/Pointing.fbx');
 
-const CHAR_SCALE = 1.0;
-const CHAR_Y     = -0.9;
-const CAM_LOOKAT = new THREE.Vector3(0, 0.0, 0);
-const CAM_POS    = new THREE.Vector3(0, 0.0, 3.6);
+const CHAR_SCALE = 0.95;
+const CHAR_Y     = -0.85;
+const CAM_LOOKAT = new THREE.Vector3(0, 0.05, 0);
+const CAM_POS    = new THREE.Vector3(0, 0.05, 4.2);
 
 export function CharacterRig({ animationState = 'wave' }) {
   const groupRef    = useRef();

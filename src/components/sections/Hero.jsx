@@ -30,8 +30,7 @@ export function Hero() {
       id="hero"
       className={cn(
         'relative min-h-screen flex flex-col justify-center',
-        'pt-24 pb-16 lg:pt-32 lg:pb-24',
-        'overflow-hidden'
+        'pt-24 pb-16 lg:pt-32 lg:pb-24'
       )}
       aria-label="Introduction"
     >
@@ -41,17 +40,17 @@ export function Hero() {
       <div className="container relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-          {/* ── Left Column: 3D Character Avatar (Standing Waving) ── */}
+          {/* ── Left Column: 3D Character Avatar (Standing Waving - 100% Full Body) ── */}
           <motion.div
             variants={blurIn}
             initial="hidden"
             animate="visible"
             transition={{ delay: 0.1 }}
             className="relative w-full mx-auto lg:mx-0 order-2 lg:order-1"
-            style={{ height: 520, maxWidth: 500 }}
+            style={{ height: 560, maxWidth: 500 }}
           >
-            {/* 3D scene – 100% transparent, waving animation */}
-            <ThreeScene animationState="wave" height="520px" />
+            {/* 3D scene – 100% transparent, full body waving animation */}
+            <ThreeScene animationState="wave" height="560px" />
           </motion.div>
 
           {/* ── Right Column: Typography & CTAs & Stats ── */}
