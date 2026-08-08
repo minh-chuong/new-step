@@ -1,9 +1,8 @@
-/**
- * Hero Section
- * Premium hero with refined typography rhythm, glass stat cards,
- * and a luxury prepared canvas slot for React Three Fiber integration.
- */
+// Updated Hero.jsx – integrates the persistent 3D avatar via ThreeScene
 
+/**
+ * Hero Section – premium hero with integrated 3D avatar.
+ */
 import { motion } from 'framer-motion';
 import { ArrowRight, Download, MapPin, Sparkles, Box } from 'lucide-react';
 import { cn } from '../../lib/cn';
@@ -17,86 +16,8 @@ import {
   staggerItem,
   blurIn,
 } from '../../config/animations';
+import { ThreeScene } from '../../three/ThreeScene'; // Import the modular 3D scene
 
-// ─── R3F Placeholder (Future-Ready 3D Slot) ──────────────────────────────────
-function ThreePlaceholder() {
-  return (
-    <div
-      className={cn(
-        'w-full h-full min-h-[380px] sm:min-h-[440px]',
-        'flex flex-col items-center justify-center',
-        'rounded-[var(--radius-2xl)]',
-        'border border-[var(--border-default)]',
-        'bg-[var(--bg-secondary)]/50 backdrop-blur-xl',
-        'shadow-[0_16px_48px_rgba(0,0,0,0.5)]',
-        'relative overflow-hidden group',
-        'transition-all duration-500 hover:border-[var(--accent-primary)]/40'
-      )}
-      aria-hidden="true"
-      role="presentation"
-    >
-      {/* Background Grid Pattern */}
-      <div className="absolute inset-0 grid-bg opacity-30 group-hover:opacity-40 transition-opacity duration-500" />
-
-      {/* Ambient Pulsing Glow Orbs */}
-      <motion.div
-        animate={{
-          scale: [1, 1.15, 1],
-          opacity: [0.15, 0.3, 0.15],
-        }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute w-72 h-72 rounded-full"
-        style={{
-          background: 'radial-gradient(circle, rgba(99,102,241,0.3) 0%, rgba(168,85,247,0.15) 50%, transparent 70%)',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-        }}
-      />
-
-      {/* Floating Status Pill */}
-      <div className="absolute top-4 right-4">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-medium text-[var(--accent-primary)] bg-[var(--accent-muted)] border border-[var(--accent-primary)]/20 shadow-sm">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-ping" />
-          R3F Canvas Ready
-        </span>
-      </div>
-
-      {/* Center Watermark & Indicator */}
-      <div className="relative z-10 flex flex-col items-center gap-4 text-center p-8">
-        <motion.div
-          animate={{ y: [-4, 4, -4] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className={cn(
-            'w-16 h-16 rounded-[var(--radius-xl)]',
-            'bg-gradient-to-br from-[var(--bg-tertiary)] to-[var(--bg-secondary)]',
-            'border border-[var(--border-strong)]',
-            'flex items-center justify-center',
-            'shadow-[0_8px_24px_rgba(0,0,0,0.4)]',
-            'group-hover:border-[var(--accent-primary)]/50 transition-colors'
-          )}
-        >
-          <Box size={26} className="text-[var(--accent-primary)]" />
-        </motion.div>
-        <div>
-          <p className="text-sm font-semibold text-[var(--text-primary)] tracking-tight">
-            Interactive 3D Scene Slot
-          </p>
-          <p className="text-xs text-[var(--text-muted)] mt-1 font-mono">
-            React Three Fiber · Three.js · GLTF Ready
-          </p>
-        </div>
-      </div>
-
-      {/* Subtle corner matrix lines */}
-      <div className="absolute bottom-4 left-4 text-[10px] font-mono text-[var(--text-muted)] opacity-60">
-        [0.0, 0.0, 0.0] · Perspective
-      </div>
-    </div>
-  );
-}
-
-// ─── Hero Section ─────────────────────────────────────────────────────────────
 export function Hero() {
   const handleContactClick = (e) => {
     e.preventDefault();
@@ -133,7 +54,7 @@ export function Hero() {
       <div className="container relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-          {/* ── Left Column: Typography & CTAs ── */}
+          {/* ── Left Column: Text & CTAs ── */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
@@ -247,7 +168,7 @@ export function Hero() {
             </motion.div>
           </motion.div>
 
-          {/* ── Right Column: 3D Scene Slot ── */}
+          {/* ── Right Column: 3D Scene ── */}
           <motion.div
             variants={blurIn}
             initial="hidden"
@@ -264,7 +185,8 @@ export function Hero() {
                   'radial-gradient(ellipse at center, rgba(99,102,241,0.12) 0%, transparent 70%)',
               }}
             />
-            <ThreePlaceholder />
+            {/* Integrated 3D scene */}
+            <ThreeScene />
           </motion.div>
         </div>
       </div>
@@ -292,4 +214,3 @@ export function Hero() {
 }
 
 export default Hero;
-

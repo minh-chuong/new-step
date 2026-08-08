@@ -1,93 +1,80 @@
-/**
- * ThreeScene — React Three Fiber Scene
- *
- * This file is prepared for R3F integration.
- * The 3D character/model is NOT implemented yet.
- *
- * To integrate:
- * 1. Add your GLTF model to src/assets/models/
- * 2. Import it here using useGLTF from @react-three/drei
- * 3. Replace the placeholder geometry below
- * 4. Import <ThreeScene /> in Hero.jsx
- *
- * ─── Dependencies (already installed) ───────────────────────────
- * - @react-three/fiber
- * - @react-three/drei
- * - three
- */
+// ThreeScene Component — 3D Character & Animation System
+// Provides a persistent, scroll‑driven avatar that travels through the portfolio.
 
 import { Suspense, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Environment, Float } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Environment, Html } from '@react-three/drei';
+import * as THREE from 'three';
 
-// ─── Placeholder Geometry (replace with your model) ──────────────
-function PlaceholderModel() {
-  const meshRef = useRef();
+import { Character } from './Character';
+import AnimationController from './AnimationController';
+import CameraController from './CameraController';
+import useScrollProgress from '../hooks/useScrollProgress';
 
-  // Gentle rotation
-  useFrame((state, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.3;
-    }
-  });
-
+// Loading spinner displayed while GLB assets load
+function CanvasLoader() {
   return (
-    <Float speed={2} rotationIntensity={0.3} floatIntensity={0.5}>
-      <mesh ref={meshRef} castShadow receiveShadow>
-        <icosahedronGeometry args={[1.5, 1]} />
-        <meshStandardMaterial
-          color="#6366f1"
-          metalness={0.4}
-          roughness={0.2}
-          wireframe={false}
-        />
-      </mesh>
-    </Float>
+    <Html center>
+      <div className="flex flex-col items-center gap-2 bg-[var(--bg-primary)]/80 backdrop-blur-md px-4 py-3 rounded-full border border-[var(--border-default)] shadow-lg">
+        <span className="w-4 h-4 rounded-full border-2 border-[var(--accent-primary)] border-t-transparent animate-spin" />
+        <span className="text-[11px] font-mono text-[var(--text-secondary)] whitespace-nowrap">
+          Loading 3D Character…
+        </span>
+      </div>
+    </Html>
   );
 }
 
-// ─── Scene Loader Fallback ────────────────────────────────────────
-function SceneFallback() {
-  return null; // Hero renders its own placeholder while R3F loads
-}
-
-// ─── Main Scene ───────────────────────────────────────────────────
 export function ThreeScene() {
+  const { activeSection, sectionProgress } = useScrollProgress();
+  const characterRef = useRef();
+
   return (
-    <Canvas
-      camera={{ position: [0, 0, 5], fov: 45 }}
-      dpr={[1, 2]}
-      performance={{ min: 0.5 }}
-      style={{ background: 'transparent' }}
-      aria-label="Interactive 3D visualization"
-    >
-      <Suspense fallback={<SceneFallback />}>
-        {/* Lighting */}
-        <ambientLight intensity={0.5} />
-        <directionalLight
-          position={[5, 5, 5]}
-          intensity={1.2}
-          castShadow
-        />
-        <pointLight position={[-3, 3, 3]} intensity={0.8} color="#818cf8" />
+    <div className="relative w-full h-full min-h-[380px] sm:min-h-[440px] rounded-[var(--radius-2xl)] overflow-hidden border border-[var(--border-default)] bg-[var(--bg-secondary)]/40 backdrop-blur-xl shadow-[0_16px_48px_rgba(0,0,0,0.5)] group">
+      {/* Background grid texture */}
+      <div className="absolute inset-0 grid-bg opacity-25 pointer-events-none" />
 
-        {/* Environment */}
-        <Environment preset="city" />
+      {/* Ambient glow orb */}
+      <div
+        className="absolute w-72 h-72 rounded-full pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(99,102,241,0.12) 0%, rgba(168,85,247,0.05) 50%, transparent 70%)',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      />
 
-        {/* Model */}
-        <PlaceholderModel />
+      <Suspense fallback={<CanvasLoader />}>
+        <Canvas
+          camera={{ position: [0, 1.5, 4], fov: 45 }}
+          dpr={[1, 2]}
+          style={{ background: 'transparent' }}
+        >
+          {/* Lighting */}
+          <ambientLight intensity={0.4} />
+          <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow />
+          <pointLight position={[-3, 3, 3]} intensity={0.6} color="#818cf8" />
+          <Environment preset="city" />
 
-        {/* Controls */}
-        <OrbitControls
-          enablePan={false}
-          enableZoom={false}
-          minPolarAngle={Math.PI / 4}
-          maxPolarAngle={(3 * Math.PI) / 4}
-          autoRotate
-          autoRotateSpeed={0.5}
-        />
+          {/* Character and controllers */}
+          <Character ref={characterRef} />
+          <AnimationController groupRef={characterRef} activeSection={activeSection} />
+          <CameraController activeSection={activeSection} sectionProgress={sectionProgress} />
+
+          {/* Subtle auto‑rotate controls */}
+          <OrbitControls
+            enableZoom={false}
+            enablePan={false}
+            minPolarAngle={Math.PI / 4}
+            maxPolarAngle={(3 * Math.PI) / 4}
+            autoRotate
+            autoRotateSpeed={0.3}
+          />
+        </Canvas>
       </Suspense>
-    </Canvas>
+    </div>
   );
 }
 
