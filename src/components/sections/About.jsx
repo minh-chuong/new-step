@@ -18,15 +18,6 @@ import { ThreeScene } from '../../three/ThreeScene';
 function About3DSlot() {
   return (
     <div className="relative w-full max-w-[480px] mx-auto" style={{ height: 540 }}>
-      {/* Ambient glow behind character */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse 80% 60% at 50% 70%, rgba(99,102,241,0.12) 0%, rgba(192,132,252,0.08) 45%, transparent 70%)',
-        }}
-      />
-
       {/* 3D character - pointing animation forced */}
       <ThreeScene forcedAnimation="point" height="540px" />
 

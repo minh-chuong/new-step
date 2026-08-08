@@ -1,13 +1,13 @@
 /**
- * CharacterRig - unified avatar logic inside R3F Canvas.
- *
- * CRITICAL: uses SkeletonUtils.clone() so each Canvas instance gets its OWN
- * copy of the scene graph. Without this, two Canvases sharing the same
- * useGLTF scene will steal the object from each other (Three.js nodes can
- * only have one parent).
- *
- * Animation switching lives in useFrame (not useEffect) because actions
- * from useAnimations may not be populated on the first useEffect run.
+ * CharacterRig - unified 3D avatar logic inside R3F Canvas.
+ * 
+ * Features:
+ * - Uses SkeletonUtils.clone() so each Canvas gets an independent scene graph.
+ * - Full-body framing (feet to head completely visible with zero cutoff).
+ * - Smooth scroll-driven animation transition:
+ *   - Hero section: Standing waving ('wave').
+ *   - Scroll to About: Leaps ('jump') into action then transitions to pointing ('point').
+ *   - Interactive mouse tracking for subtle head/body orientation.
  */
 import { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -15,33 +15,30 @@ import { useGLTF, useFBX, useAnimations } from '@react-three/drei';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 
-// preload
+// Preload assets for instant rendering
 useGLTF.preload('/models/model.glb');
 useGLTF.preload('/models/animations/Standing_Idle.glb');
 useGLTF.preload('/models/animations/Waving.glb');
 useGLTF.preload('/models/animations/Jumping.glb');
 useFBX.preload('/models/animations/Pointing.fbx');
 
-// ── display constants ───────────────────────────────────────────────────────────
-// At scale 1.5 the ~1.75m Avaturn model = 2.625 world units tall.
-// Y offset places feet at y=-1.3, head at y≈1.33, center ≈ y=0.
-const CHAR_SCALE = 1.5;
-const CHAR_Y     = -1.3;
-
-// Camera sees full body: lookAt at character center, z far enough for FOV 45.
-// Visible height at z=4 with FOV 45 ≈ 3.3 units -> fits 2.625 comfortably.
-const CAM_LOOKAT = new THREE.Vector3(0, 0, 0);
+// ── Display & Framing Constants ────────────────────────────────────────────────
+// Scale 1.35 + Y offset -1.05 places character feet at y=-1.05, head at y=+1.31.
+// Camera at z=4.5 with FOV 45 has vertical bounds [-1.7, +1.9], perfectly framing full body.
+const CHAR_SCALE = 1.35;
+const CHAR_Y     = -1.05;
+const CAM_LOOKAT = new THREE.Vector3(0, 0.15, 0);
 
 const CAM_POSITIONS = {
-  hero:       new THREE.Vector3(0,    0.0, 4.0),
-  about:      new THREE.Vector3(-0.2, 0.0, 4.0),
-  projects:   new THREE.Vector3(0.2,  0.0, 3.8),
-  skills:     new THREE.Vector3(0,    0.2, 4.0),
-  experience: new THREE.Vector3(-0.2, 0.0, 4.0),
-  contact:    new THREE.Vector3(0,    0.0, 4.0),
+  hero:       new THREE.Vector3(0, 0.1, 4.5),
+  about:      new THREE.Vector3(0, 0.1, 4.5),
+  projects:   new THREE.Vector3(0, 0.15, 4.3),
+  skills:     new THREE.Vector3(0, 0.2, 4.5),
+  experience: new THREE.Vector3(0, 0.1, 4.5),
+  contact:    new THREE.Vector3(0, 0.1, 4.5),
 };
 
-// section -> animation name
+// Map section to animation state
 function sectionToAnim(section) {
   switch (section) {
     case 'hero':       return 'wave';
@@ -50,18 +47,19 @@ function sectionToAnim(section) {
     case 'skills':     return 'jump';
     case 'experience': return 'idle';
     case 'contact':    return 'wave';
-    default:           return 'idle';
+    default:           return 'wave';
   }
 }
 
-// ── component ───────────────────────────────────────────────────────────────────
 export function CharacterRig({ activeSection, forcedAnimation }) {
-  const groupRef    = useRef();
-  const currentAnim = useRef(null);
-  const camTarget   = useRef(new THREE.Vector3(0, 0, 4.0));
-  const { camera }  = useThree();
+  const groupRef       = useRef();
+  const currentAnim    = useRef(null);
+  const camTarget      = useRef(new THREE.Vector3(0, 0.1, 4.5));
+  const prevSectionRef = useRef(activeSection);
+  const jumpTimerRef   = useRef(null);
+  const { camera }     = useThree();
 
-  // Load mesh and CLONE it so each Canvas instance gets a separate scene graph
+  // Load mesh and CLONE it for isolated scene graph per Canvas
   const { scene: originalScene } = useGLTF('/models/model.glb');
   const clonedScene = useMemo(() => {
     const c = clone(originalScene);
@@ -74,7 +72,7 @@ export function CharacterRig({ activeSection, forcedAnimation }) {
     return c;
   }, [originalScene]);
 
-  // animation clips
+  // Load animation clips
   const idleGltf = useGLTF('/models/animations/Standing_Idle.glb');
   const waveGltf = useGLTF('/models/animations/Waving.glb');
   const jumpGltf = useGLTF('/models/animations/Jumping.glb');
@@ -101,31 +99,50 @@ export function CharacterRig({ activeSection, forcedAnimation }) {
 
   const { actions } = useAnimations(clips, groupRef);
 
-  // per-frame: animation + camera + mouse tracking
+  // Per-frame logic: animation crossfading, camera lerp, subtle mouse tracking
   useFrame((state) => {
-    // ── animation (reliable frame-based check) ──
-    const nextName = forcedAnimation ?? sectionToAnim(activeSection);
-    if (currentAnim.current !== nextName) {
-      const next = actions[nextName] ?? actions['idle'];
+    let targetAnim = forcedAnimation ?? sectionToAnim(activeSection);
+
+    // Dynamic scroll transition: when scrolling from Hero -> About, play Jump first!
+    if (
+      !forcedAnimation &&
+      prevSectionRef.current === 'hero' &&
+      activeSection === 'about' &&
+      !jumpTimerRef.current
+    ) {
+      jumpTimerRef.current = setTimeout(() => {
+        jumpTimerRef.current = null;
+      }, 850);
+    }
+
+    if (jumpTimerRef.current) {
+      targetAnim = 'jump';
+    }
+
+    prevSectionRef.current = activeSection;
+
+    // Crossfade animation when targetAnim changes
+    if (currentAnim.current !== targetAnim) {
+      const next = actions[targetAnim] ?? actions['wave'] ?? actions['idle'];
       if (next) {
         const prev = currentAnim.current ? actions[currentAnim.current] : null;
         next.reset().setEffectiveTimeScale(1).setEffectiveWeight(1);
         if (prev && prev !== next) {
-          prev.fadeOut(0.5);
-          next.crossFadeFrom(prev, 0.5, true);
+          prev.fadeOut(0.4);
+          next.crossFadeFrom(prev, 0.4, true);
         }
         next.play();
-        currentAnim.current = nextName;
+        currentAnim.current = targetAnim;
       }
     }
 
-    // ── camera ──
+    // Camera smooth lerp
     const target = CAM_POSITIONS[activeSection] ?? CAM_POSITIONS.hero;
     camTarget.current.lerp(target, 0.04);
     camera.position.copy(camTarget.current);
     camera.lookAt(CAM_LOOKAT);
 
-    // ── subtle body sway toward cursor ──
+    // Subtle body sway toward mouse cursor
     if (groupRef.current) {
       const maxY = Math.PI / 10;
       const maxX = Math.PI / 18;

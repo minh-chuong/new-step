@@ -1,22 +1,18 @@
-// Updated Hero.jsx – integrates the persistent 3D avatar via ThreeScene
+// Updated Hero.jsx – 3D avatar on Left, Text & CTAs on Right
 
-/**
- * Hero Section – premium hero with integrated 3D avatar.
- */
 import { motion } from 'framer-motion';
-import { ArrowRight, Download, MapPin, Sparkles, Box } from 'lucide-react';
+import { ArrowRight, Download, MapPin, Sparkles } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { site } from '../../data/site';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import {
   fadeIn,
-  fadeInUp,
   staggerContainer,
   staggerItem,
   blurIn,
 } from '../../config/animations';
-import { ThreeScene } from '../../three/ThreeScene'; // Import the modular 3D scene
+import { ThreeScene } from '../../three/ThreeScene';
 
 export function Hero() {
   const handleContactClick = (e) => {
@@ -42,24 +38,28 @@ export function Hero() {
       {/* Background grid */}
       <div className="absolute inset-0 grid-bg opacity-25 pointer-events-none" aria-hidden="true" />
 
-      {/* Ambient background light */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden="true"
-        style={{
-          background: 'radial-gradient(ellipse 70% 50% at 50% -10%, rgba(99,102,241,0.12) 0%, transparent 70%)',
-        }}
-      />
-
       <div className="container relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-          {/* ── Left Column: Text & CTAs ── */}
+          {/* ── Left Column: 3D Character Avatar ── */}
+          <motion.div
+            variants={blurIn}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.1 }}
+            className="relative w-full mx-auto lg:mx-0 order-2 lg:order-1"
+            style={{ height: 620, maxWidth: 560 }}
+          >
+            {/* 3D scene – 100% transparent, no background glow, no border */}
+            <ThreeScene height="620px" />
+          </motion.div>
+
+          {/* ── Right Column: Typography & CTAs & Stats ── */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
-            className="flex flex-col gap-6 lg:gap-7"
+            className="flex flex-col gap-6 lg:gap-7 order-1 lg:order-2"
           >
             {/* Availability & Location */}
             <motion.div variants={staggerItem} className="flex items-center gap-3 flex-wrap">
@@ -168,27 +168,6 @@ export function Hero() {
             </motion.div>
           </motion.div>
 
-          {/* ── Right Column: 3D Scene ── */}
-          <motion.div
-            variants={blurIn}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.2 }}
-            className="relative w-full mx-auto lg:mx-0"
-            style={{ height: 620, maxWidth: 560 }}
-          >
-            {/* Subtle ambient glow – NOT a visible box frame */}
-            <div
-              className="absolute -inset-8 pointer-events-none"
-              aria-hidden="true"
-              style={{
-                background:
-                  'radial-gradient(ellipse 70% 60% at 50% 60%, rgba(99,102,241,0.13) 0%, transparent 70%)',
-              }}
-            />
-            {/* 3D scene – transparent, no border */}
-            <ThreeScene height="620px" />
-          </motion.div>
         </div>
       </div>
 

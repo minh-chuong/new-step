@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ThreeScene - transparent canvas wrapper, no border/frame.
  * Suspense lives INSIDE Canvas via Html.
  * forcedAnimation: locks character to a specific animation state.
@@ -64,16 +64,6 @@ export function ThreeScene({ forcedAnimation, height = "100%" }) {
         overflow: "visible",
       }}
     >
-      {/* Soft ambient glow — NOT a visible box */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background:
-            "radial-gradient(ellipse 55% 65% at 50% 75%, rgba(99,102,241,0.11) 0%, transparent 70%)",
-        }}
-      />
 
       <Canvas
         camera={{ position: [0, 0.6, 3.4], fov: 50 }}
