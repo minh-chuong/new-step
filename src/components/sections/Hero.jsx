@@ -1,7 +1,7 @@
-// Updated Hero.jsx – 3D avatar on Left, Text & CTAs on Right
+// Hero.jsx – Text on Right, 3D Character spatial slot on Left
 
 import { motion } from 'framer-motion';
-import { ArrowRight, Download, MapPin, Sparkles } from 'lucide-react';
+import { ArrowRight, Download, MapPin } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { site } from '../../data/site';
 import { Button } from '../ui/Button';
@@ -12,7 +12,6 @@ import {
   staggerItem,
   blurIn,
 } from '../../config/animations';
-import { ThreeScene } from '../../three/ThreeScene';
 
 export function Hero() {
   const handleContactClick = (e) => {
@@ -38,21 +37,19 @@ export function Hero() {
       {/* Background grid */}
       <div className="absolute inset-0 grid-bg opacity-25 pointer-events-none" aria-hidden="true" />
 
-      <div className="container relative z-10">
+      <div className="container relative z-20">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-          {/* ── Left Column: 3D Character Avatar ── */}
+          {/* ── Left Column: Reserved Spatial Slot for Single Continuous 3D Character ── */}
           <motion.div
             variants={blurIn}
             initial="hidden"
             animate="visible"
             transition={{ delay: 0.1 }}
-            className="relative w-full mx-auto lg:mx-0 order-2 lg:order-1"
-            style={{ height: 620, maxWidth: 560 }}
-          >
-            {/* 3D scene – 100% transparent, no background glow, no border */}
-            <ThreeScene height="620px" />
-          </motion.div>
+            className="relative w-full mx-auto lg:mx-0 order-2 lg:order-1 hidden lg:block"
+            style={{ height: 550, maxWidth: 500 }}
+            aria-hidden="true"
+          />
 
           {/* ── Right Column: Typography & CTAs & Stats ── */}
           <motion.div

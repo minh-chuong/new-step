@@ -1,32 +1,27 @@
 /**
  * About Section
- * Bio, extended description, and an elegant left-side visual composition with
- * floating glass cards, design philosophy pill, and ambient gradient orb.
+ * Bio, extended description, and floating glass cards framing the single continuous 3D Avatar.
  */
 
 import { motion } from 'framer-motion';
-import { Sparkles, Code2, Layers, Cpu, CheckCircle2 } from 'lucide-react';
+import { Sparkles, CheckCircle2 } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { site } from '../../data/site';
 import { SectionLabel } from '../ui/SectionLabel';
 import { Divider } from '../ui/Divider';
 import { staggerContainer, staggerItem, fadeInLeft } from '../../config/animations';
 import { useInView } from '../../hooks/useInView';
-import { ThreeScene } from '../../three/ThreeScene';
 
-/// ── 3D Visual Column for About ─────────────────────────────────────────────────────────────
-function About3DSlot() {
+// ── Floating UI overlays framing the global 3D avatar ──────────────────────────
+function AboutGlassOverlays() {
   return (
-    <div className="relative w-full max-w-[480px] mx-auto" style={{ height: 540 }}>
-      {/* 3D character - pointing animation forced */}
-      <ThreeScene forcedAnimation="point" height="540px" />
-
+    <div className="relative w-full max-w-[480px] h-[500px] mx-auto pointer-events-none">
       {/* Floating glass card overlay - Design Philosophy */}
       <motion.div
         animate={{ y: [-5, 5, -5] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         className={cn(
-          'absolute top-6 -left-4 z-20',
+          'absolute top-6 -left-4 z-20 pointer-events-auto',
           'px-4 py-3 rounded-[var(--radius-xl)]',
           'bg-[var(--bg-primary)]/85 backdrop-blur-xl',
           'border border-[var(--border-default)]',
@@ -48,7 +43,7 @@ function About3DSlot() {
         animate={{ y: [6, -6, 6] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         className={cn(
-          'absolute bottom-12 -right-4 z-20',
+          'absolute bottom-12 -right-4 z-20 pointer-events-auto',
           'px-4 py-3 rounded-[var(--radius-xl)]',
           'bg-[var(--bg-primary)]/85 backdrop-blur-xl',
           'border border-[var(--border-default)]',
@@ -68,28 +63,28 @@ function About3DSlot() {
   );
 }
 
-// ─── Main About Section ───────────────────────────────────────────────────────
+// ── Main About Section ───────────────────────────────────────────────────────
 export function About() {
   const { ref: containerRef, inView } = useInView({ threshold: 0.1, once: true });
 
   return (
-    <section id="about" className="section" aria-labelledby="about-heading">
+    <section id="about" className="section relative z-20" aria-labelledby="about-heading">
       <div className="container">
         <div
           ref={containerRef}
           className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center"
         >
-          {/* Left: 3D Character Column */}
+          {/* Left Column: Glass Overlays framing 3D Avatar */}
           <motion.div
             variants={fadeInLeft}
             initial="hidden"
             animate={inView ? 'visible' : 'hidden'}
             className="flex justify-center lg:justify-start"
           >
-            <About3DSlot />
+            <AboutGlassOverlays />
           </motion.div>
 
-          {/* Right: Text Content */}
+          {/* Right Column: Text Content */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
@@ -143,4 +138,3 @@ export function About() {
 }
 
 export default About;
-

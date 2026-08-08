@@ -1,13 +1,15 @@
 /**
- * CharacterRig - unified 3D avatar logic inside R3F Canvas.
+ * CharacterRig - Single Continuous 3D Avatar Logic
  * 
  * Features:
- * - Uses SkeletonUtils.clone() so each Canvas gets an independent scene graph.
+ * - Single persistent 3D character instance across the entire site.
+ * - Dynamic scroll position interpolation (x, y, z) per section.
+ * - Smooth scroll-driven animation transition state machine:
+ *   - Hero (Page 1): Standing waving ('wave').
+ *   - Scroll Hero -> About (Page 2): Leaps ('jump') and lands into pointing ('point').
+ *   - Projects: Pointing ('point').
+ *   - Contact: Waving ('wave').
  * - Full-body framing (feet to head completely visible with zero cutoff).
- * - Smooth scroll-driven animation transition:
- *   - Hero section: Standing waving ('wave').
- *   - Scroll to About: Leaps ('jump') into action then transitions to pointing ('point').
- *   - Interactive mouse tracking for subtle head/body orientation.
  */
 import { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -15,7 +17,7 @@ import { useGLTF, useFBX, useAnimations } from '@react-three/drei';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 
-// Preload assets for instant rendering
+// Preload assets
 useGLTF.preload('/models/model.glb');
 useGLTF.preload('/models/animations/Standing_Idle.glb');
 useGLTF.preload('/models/animations/Waving.glb');
@@ -23,22 +25,25 @@ useGLTF.preload('/models/animations/Jumping.glb');
 useFBX.preload('/models/animations/Pointing.fbx');
 
 // ── Display & Framing Constants ────────────────────────────────────────────────
-// Scale 1.35 + Y offset -1.05 places character feet at y=-1.05, head at y=+1.31.
-// Camera at z=4.5 with FOV 45 has vertical bounds [-1.7, +1.9], perfectly framing full body.
-const CHAR_SCALE = 1.35;
-const CHAR_Y     = -1.05;
-const CAM_LOOKAT = new THREE.Vector3(0, 0.15, 0);
+const CHAR_SCALE_DESKTOP = 1.35;
+const CHAR_SCALE_MOBILE  = 1.05;
+const CHAR_Y             = -1.05;
+const CAM_LOOKAT         = new THREE.Vector3(0, 0.15, 0);
 
-const CAM_POSITIONS = {
-  hero:       new THREE.Vector3(0, 0.1, 4.5),
-  about:      new THREE.Vector3(0, 0.1, 4.5),
-  projects:   new THREE.Vector3(0, 0.15, 4.3),
-  skills:     new THREE.Vector3(0, 0.2, 4.5),
-  experience: new THREE.Vector3(0, 0.1, 4.5),
-  contact:    new THREE.Vector3(0, 0.1, 4.5),
+// Target 3D positions [x, y, z] per section for the single character
+const SECTION_CHAR_POSITIONS = {
+  hero:       new THREE.Vector3(-1.4, CHAR_Y, 0),
+  about:      new THREE.Vector3(-1.4, CHAR_Y, 0),
+  projects:   new THREE.Vector3(1.4,  CHAR_Y, 0),
+  skills:     new THREE.Vector3(-1.4, CHAR_Y, 0),
+  experience: new THREE.Vector3(-1.4, CHAR_Y, 0),
+  contact:    new THREE.Vector3(0,    CHAR_Y, 0),
 };
 
-// Map section to animation state
+// Target camera position
+const CAM_POSITION = new THREE.Vector3(0, 0.1, 4.5);
+
+// Section -> default animation state
 function sectionToAnim(section) {
   switch (section) {
     case 'hero':       return 'wave';
@@ -51,15 +56,18 @@ function sectionToAnim(section) {
   }
 }
 
-export function CharacterRig({ activeSection, forcedAnimation }) {
+export function CharacterRig({ activeSection }) {
   const groupRef       = useRef();
   const currentAnim    = useRef(null);
-  const camTarget      = useRef(new THREE.Vector3(0, 0.1, 4.5));
+  const charPosRef     = useRef(new THREE.Vector3(-1.4, CHAR_Y, 0));
   const prevSectionRef = useRef(activeSection);
-  const jumpTimerRef   = useRef(null);
-  const { camera }     = useThree();
+  const jumpTimeoutRef = useRef(null);
+  const isJumpingRef   = useRef(false);
+  const { camera, size } = useThree();
 
-  // Load mesh and CLONE it for isolated scene graph per Canvas
+  const isMobile = size.width < 768;
+
+  // Load mesh and CLONE it for clean scene graph
   const { scene: originalScene } = useGLTF('/models/model.glb');
   const clonedScene = useMemo(() => {
     const c = clone(originalScene);
@@ -99,51 +107,54 @@ export function CharacterRig({ activeSection, forcedAnimation }) {
 
   const { actions } = useAnimations(clips, groupRef);
 
-  // Per-frame logic: animation crossfading, camera lerp, subtle mouse tracking
+  // Per-frame render loop
   useFrame((state) => {
-    let targetAnim = forcedAnimation ?? sectionToAnim(activeSection);
+    // ── Section Transition Animation Logic ──
+    let targetAnim = sectionToAnim(activeSection);
 
-    // Dynamic scroll transition: when scrolling from Hero -> About, play Jump first!
-    if (
-      !forcedAnimation &&
-      prevSectionRef.current === 'hero' &&
-      activeSection === 'about' &&
-      !jumpTimerRef.current
-    ) {
-      jumpTimerRef.current = setTimeout(() => {
-        jumpTimerRef.current = null;
-      }, 850);
+    // Detect transition from Hero -> About (or any section change)
+    if (prevSectionRef.current !== activeSection) {
+      if (prevSectionRef.current === 'hero' && activeSection === 'about') {
+        // Trigger jump animation transition!
+        isJumpingRef.current = true;
+        if (jumpTimeoutRef.current) clearTimeout(jumpTimeoutRef.current);
+        jumpTimeoutRef.current = setTimeout(() => {
+          isJumpingRef.current = false;
+        }, 850);
+      }
+      prevSectionRef.current = activeSection;
     }
 
-    if (jumpTimerRef.current) {
+    if (isJumpingRef.current) {
       targetAnim = 'jump';
     }
 
-    prevSectionRef.current = activeSection;
-
-    // Crossfade animation when targetAnim changes
+    // ── Animation Crossfading ──
     if (currentAnim.current !== targetAnim) {
       const next = actions[targetAnim] ?? actions['wave'] ?? actions['idle'];
       if (next) {
         const prev = currentAnim.current ? actions[currentAnim.current] : null;
         next.reset().setEffectiveTimeScale(1).setEffectiveWeight(1);
         if (prev && prev !== next) {
-          prev.fadeOut(0.4);
-          next.crossFadeFrom(prev, 0.4, true);
+          prev.fadeOut(0.35);
+          next.crossFadeFrom(prev, 0.35, true);
         }
         next.play();
         currentAnim.current = targetAnim;
       }
     }
 
-    // Camera smooth lerp
-    const target = CAM_POSITIONS[activeSection] ?? CAM_POSITIONS.hero;
-    camTarget.current.lerp(target, 0.04);
-    camera.position.copy(camTarget.current);
-    camera.lookAt(CAM_LOOKAT);
+    // ── Smooth Character Position Interpolation ──
+    const targetPos = isMobile
+      ? new THREE.Vector3(0, -1.2, 0)
+      : (SECTION_CHAR_POSITIONS[activeSection] ?? SECTION_CHAR_POSITIONS.hero);
 
-    // Subtle body sway toward mouse cursor
+    charPosRef.current.lerp(targetPos, 0.06);
+
     if (groupRef.current) {
+      groupRef.current.position.copy(charPosRef.current);
+
+      // Subtle mouse sway
       const maxY = Math.PI / 10;
       const maxX = Math.PI / 18;
       const ry = THREE.MathUtils.clamp(state.pointer.x * maxY, -maxY, maxY);
@@ -151,10 +162,16 @@ export function CharacterRig({ activeSection, forcedAnimation }) {
       groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, ry, 0.05);
       groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, rx, 0.05);
     }
+
+    // ── Camera Framing ──
+    camera.position.copy(CAM_POSITION);
+    camera.lookAt(CAM_LOOKAT);
   });
 
+  const scale = isMobile ? CHAR_SCALE_MOBILE : CHAR_SCALE_DESKTOP;
+
   return (
-    <group ref={groupRef} position={[0, CHAR_Y, 0]} scale={CHAR_SCALE} dispose={null}>
+    <group ref={groupRef} position={[-1.4, CHAR_Y, 0]} scale={scale} dispose={null}>
       <primitive object={clonedScene} />
     </group>
   );
