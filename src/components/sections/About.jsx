@@ -1,6 +1,6 @@
 /**
  * About Section
- * Bio, extended description, and floating glass cards framing the single continuous 3D Avatar.
+ * Bio, extended description, and 3D Avatar (Standing Pointing) with floating glass cards.
  */
 
 import { motion } from 'framer-motion';
@@ -11,17 +11,21 @@ import { SectionLabel } from '../ui/SectionLabel';
 import { Divider } from '../ui/Divider';
 import { staggerContainer, staggerItem, fadeInLeft } from '../../config/animations';
 import { useInView } from '../../hooks/useInView';
+import { ThreeScene } from '../../three/ThreeScene';
 
-// ── Floating UI overlays framing the global 3D avatar ──────────────────────────
-function AboutGlassOverlays() {
+// ── 3D Column for About (Standing Pointing + Floating UI Overlays) ─────────────
+function About3DColumn() {
   return (
-    <div className="relative w-full max-w-[480px] h-[500px] mx-auto pointer-events-none">
+    <div className="relative w-full max-w-[480px] h-[520px] mx-auto">
+      {/* 3D character - standing pointing animation */}
+      <ThreeScene animationState="point" height="520px" />
+
       {/* Floating glass card overlay - Design Philosophy */}
       <motion.div
         animate={{ y: [-5, 5, -5] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         className={cn(
-          'absolute top-6 -left-4 z-20 pointer-events-auto',
+          'absolute top-6 -left-4 z-20',
           'px-4 py-3 rounded-[var(--radius-xl)]',
           'bg-[var(--bg-primary)]/85 backdrop-blur-xl',
           'border border-[var(--border-default)]',
@@ -43,7 +47,7 @@ function AboutGlassOverlays() {
         animate={{ y: [6, -6, 6] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         className={cn(
-          'absolute bottom-12 -right-4 z-20 pointer-events-auto',
+          'absolute bottom-12 -right-4 z-20',
           'px-4 py-3 rounded-[var(--radius-xl)]',
           'bg-[var(--bg-primary)]/85 backdrop-blur-xl',
           'border border-[var(--border-default)]',
@@ -74,14 +78,14 @@ export function About() {
           ref={containerRef}
           className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center"
         >
-          {/* Left Column: Glass Overlays framing 3D Avatar */}
+          {/* Left Column: 3D Character (Standing Pointing) */}
           <motion.div
             variants={fadeInLeft}
             initial="hidden"
             animate={inView ? 'visible' : 'hidden'}
             className="flex justify-center lg:justify-start"
           >
-            <AboutGlassOverlays />
+            <About3DColumn />
           </motion.div>
 
           {/* Right Column: Text Content */}

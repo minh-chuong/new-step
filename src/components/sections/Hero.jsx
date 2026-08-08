@@ -1,4 +1,4 @@
-// Hero.jsx – Text on Right, 3D Character spatial slot on Left
+// Hero Section – 3D Character Waving on Left, Text & CTAs on Right
 
 import { motion } from 'framer-motion';
 import { ArrowRight, Download, MapPin } from 'lucide-react';
@@ -12,6 +12,7 @@ import {
   staggerItem,
   blurIn,
 } from '../../config/animations';
+import { ThreeScene } from '../../three/ThreeScene';
 
 export function Hero() {
   const handleContactClick = (e) => {
@@ -37,19 +38,21 @@ export function Hero() {
       {/* Background grid */}
       <div className="absolute inset-0 grid-bg opacity-25 pointer-events-none" aria-hidden="true" />
 
-      <div className="container relative z-20">
+      <div className="container relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-          {/* ── Left Column: Reserved Spatial Slot for Single Continuous 3D Character ── */}
+          {/* ── Left Column: 3D Character Avatar (Standing Waving) ── */}
           <motion.div
             variants={blurIn}
             initial="hidden"
             animate="visible"
             transition={{ delay: 0.1 }}
-            className="relative w-full mx-auto lg:mx-0 order-2 lg:order-1 hidden lg:block"
-            style={{ height: 550, maxWidth: 500 }}
-            aria-hidden="true"
-          />
+            className="relative w-full mx-auto lg:mx-0 order-2 lg:order-1"
+            style={{ height: 520, maxWidth: 500 }}
+          >
+            {/* 3D scene – 100% transparent, waving animation */}
+            <ThreeScene animationState="wave" height="520px" />
+          </motion.div>
 
           {/* ── Right Column: Typography & CTAs & Stats ── */}
           <motion.div
