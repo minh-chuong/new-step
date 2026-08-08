@@ -175,7 +175,7 @@ export function Hero() {
             animate="visible"
             transition={{ delay: 0.2 }}
             className="relative w-full mx-auto lg:mx-0"
-            style={{ height: 520, maxWidth: 540 }}
+            style={{ height: 620, maxWidth: 560 }}
           >
             {/* Subtle ambient glow – NOT a visible box frame */}
             <div
@@ -187,7 +187,7 @@ export function Hero() {
               }}
             />
             {/* 3D scene – transparent, no border */}
-            <ThreeScene />
+            <ThreeScene height="620px" />
           </motion.div>
         </div>
       </div>

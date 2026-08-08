@@ -17,7 +17,7 @@ import { ThreeScene } from '../../three/ThreeScene';
 /// ── 3D Visual Column for About ─────────────────────────────────────────────────────────────
 function About3DSlot() {
   return (
-    <div className="relative w-full max-w-[480px] mx-auto" style={{ height: 500 }}>
+    <div className="relative w-full max-w-[480px] mx-auto" style={{ height: 540 }}>
       {/* Ambient glow behind character */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -28,7 +28,7 @@ function About3DSlot() {
       />
 
       {/* 3D character - pointing animation forced */}
-      <ThreeScene forcedAnimation="point" />
+      <ThreeScene forcedAnimation="point" height="540px" />
 
       {/* Floating glass card overlay - Design Philosophy */}
       <motion.div
