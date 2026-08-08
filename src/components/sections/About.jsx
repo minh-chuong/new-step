@@ -12,76 +12,30 @@ import { SectionLabel } from '../ui/SectionLabel';
 import { Divider } from '../ui/Divider';
 import { staggerContainer, staggerItem, fadeInLeft } from '../../config/animations';
 import { useInView } from '../../hooks/useInView';
+import { ThreeScene } from '../../three/ThreeScene';
 
-// ─── Left Visual Composition (Future 3D / UI Craft Composition) ───────────────
-function AboutVisualComposition() {
+/// ── 3D Visual Column for About ─────────────────────────────────────────────────────────────
+function About3DSlot() {
   return (
-    <div className="relative w-full max-w-[480px] aspect-square mx-auto flex items-center justify-center">
-
-      {/* Ambient Pulsing Gradient Orb */}
-      <motion.div
-        animate={{
-          scale: [1, 1.15, 1],
-          opacity: [0.2, 0.4, 0.2],
-        }}
-        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute w-80 h-80 rounded-full pointer-events-none"
+    <div className="relative w-full max-w-[480px] mx-auto" style={{ height: 500 }}>
+      {/* Ambient glow behind character */}
+      <div
+        className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(circle, rgba(99,102,241,0.25) 0%, rgba(192,132,252,0.15) 45%, transparent 70%)',
+            'radial-gradient(ellipse 80% 60% at 50% 70%, rgba(99,102,241,0.12) 0%, rgba(192,132,252,0.08) 45%, transparent 70%)',
         }}
       />
 
-      {/* Central Glass Frame Container (Space reserved for 3D element) */}
-      <div
-        className={cn(
-          'relative w-64 h-64 sm:w-72 sm:h-72',
-          'rounded-[var(--radius-2xl)]',
-          'border border-[var(--border-default)]',
-          'bg-[var(--bg-secondary)]/50 backdrop-blur-2xl',
-          'shadow-[0_16px_48px_rgba(0,0,0,0.5)]',
-          'flex flex-col items-center justify-center p-6',
-          'overflow-hidden group'
-        )}
-      >
-        {/* Subtle grid background */}
-        <div className="absolute inset-0 grid-bg opacity-30" />
+      {/* 3D character - pointing animation forced */}
+      <ThreeScene forcedAnimation="point" />
 
-        {/* Outer subtle ring */}
-        <div className="absolute inset-3 rounded-[var(--radius-xl)] border border-[var(--border-subtle)] pointer-events-none" />
-
-        {/* Initials Badge */}
-        <motion.div
-          animate={{ scale: [1, 1.03, 1] }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-          className={cn(
-            'relative z-10 w-20 h-20 rounded-[var(--radius-xl)]',
-            'bg-gradient-to-br from-[var(--accent-secondary)]/20 to-[var(--bg-tertiary)]',
-            'border border-[var(--accent-primary)]/30 shadow-[0_0_30px_rgba(99,102,241,0.2)]',
-            'flex items-center justify-center'
-          )}
-        >
-          <span className="text-3xl font-bold tracking-tight gradient-text-accent">
-            {site.initials}
-          </span>
-        </motion.div>
-
-        <p className="relative z-10 text-xs font-medium text-[var(--text-secondary)] mt-4">
-          Systematic Craft & Engineering
-        </p>
-
-        {/* Corner matrix detail */}
-        <div className="absolute bottom-3 right-4 text-[9px] font-mono text-[var(--text-muted)]">
-          [PROD_READY]
-        </div>
-      </div>
-
-      {/* ── Floating Glass Card 1: Design Philosophy (Top Left) ── */}
+      {/* Floating glass card overlay - Design Philosophy */}
       <motion.div
         animate={{ y: [-5, 5, -5] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         className={cn(
-          'absolute -top-2 -left-2 sm:-left-6 z-20',
+          'absolute top-6 -left-4 z-20',
           'px-4 py-3 rounded-[var(--radius-xl)]',
           'bg-[var(--bg-primary)]/85 backdrop-blur-xl',
           'border border-[var(--border-default)]',
@@ -93,21 +47,17 @@ function AboutVisualComposition() {
           <Sparkles size={15} className="text-[var(--accent-primary)]" />
         </div>
         <div>
-          <p className="text-xs font-semibold text-[var(--text-primary)]">
-            Design Philosophy
-          </p>
-          <p className="text-[10px] text-[var(--text-muted)]">
-            Craft · Precision · Performance
-          </p>
+          <p className="text-xs font-semibold text-[var(--text-primary)]">Design Philosophy</p>
+          <p className="text-[10px] text-[var(--text-muted)]">Craft · Precision · Performance</p>
         </div>
       </motion.div>
 
-      {/* ── Floating Glass Card 2: Experience Badge (Bottom Right) ── */}
+      {/* Floating glass card overlay - Production Quality */}
       <motion.div
         animate={{ y: [6, -6, 6] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         className={cn(
-          'absolute -bottom-2 -right-2 sm:-right-6 z-20',
+          'absolute bottom-12 -right-4 z-20',
           'px-4 py-3 rounded-[var(--radius-xl)]',
           'bg-[var(--bg-primary)]/85 backdrop-blur-xl',
           'border border-[var(--border-default)]',
@@ -119,33 +69,10 @@ function AboutVisualComposition() {
           <CheckCircle2 size={15} className="text-emerald-400" />
         </div>
         <div>
-          <p className="text-xs font-semibold text-[var(--text-primary)]">
-            Production Quality
-          </p>
-          <p className="text-[10px] text-[var(--text-muted)]">
-            6+ Yrs · 40+ Projects Shipped
-          </p>
+          <p className="text-xs font-semibold text-[var(--text-primary)]">Production Quality</p>
+          <p className="text-[10px] text-[var(--text-muted)]">6+ Yrs · 40+ Projects Shipped</p>
         </div>
       </motion.div>
-
-      {/* ── Floating Glass Card 3: Stack Badge (Top Right) ── */}
-      <motion.div
-        animate={{ y: [-4, 4, -4] }}
-        transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-        className={cn(
-          'absolute top-8 -right-4 sm:-right-8 z-10',
-          'px-3 py-1.5 rounded-full',
-          'bg-[var(--bg-secondary)]/90 backdrop-blur-md',
-          'border border-[var(--border-subtle)]',
-          'flex items-center gap-2 shadow-sm'
-        )}
-      >
-        <Code2 size={12} className="text-[var(--accent-primary)]" />
-        <span className="text-[11px] font-mono font-medium text-[var(--text-secondary)]">
-          React 19 & Tailwind
-        </span>
-      </motion.div>
-
     </div>
   );
 }
@@ -161,14 +88,14 @@ export function About() {
           ref={containerRef}
           className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center"
         >
-          {/* Left: Enhanced Visual Composition */}
+          {/* Left: 3D Character Column */}
           <motion.div
             variants={fadeInLeft}
             initial="hidden"
             animate={inView ? 'visible' : 'hidden'}
             className="flex justify-center lg:justify-start"
           >
-            <AboutVisualComposition />
+            <About3DSlot />
           </motion.div>
 
           {/* Right: Text Content */}

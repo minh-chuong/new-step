@@ -1,6 +1,7 @@
 /**
- * ThreeScene - fixed: Suspense is INSIDE Canvas (via Html), not wrapping it.
- * OrbitControls removed to avoid fighting camera controller.
+ * ThreeScene - transparent canvas wrapper, no border/frame.
+ * Suspense lives INSIDE Canvas via Html.
+ * Accepts optional `forcedAnimation` prop to lock a specific animation state.
  */
 import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
@@ -30,38 +31,37 @@ function CanvasLoader() {
   );
 }
 
-export function ThreeScene() {
+export function ThreeScene({ forcedAnimation }) {
   const { activeSection, sectionProgress } = useScrollProgress();
 
   return (
-    <div style={{
-      position: 'relative', width: '100%', height: '100%', minHeight: 380,
-      borderRadius: 'var(--radius-2xl, 16px)', overflow: 'hidden',
-      border: '1px solid var(--border-default, rgba(255,255,255,0.08))',
-      background: 'var(--bg-secondary, rgba(15,15,25,0.4))',
-      backdropFilter: 'blur(24px)', boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
-    }}>
-      <div className="absolute inset-0 grid-bg opacity-25 pointer-events-none" />
+    // No border, no background - fully transparent
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+      {/* Subtle ambient glow behind character - not a box frame */}
       <div style={{
-        position: 'absolute', width: 288, height: 288, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, rgba(168,85,247,0.05) 50%, transparent 70%)',
-        top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none',
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse 60% 70% at 50% 80%, rgba(99,102,241,0.10) 0%, transparent 70%)',
       }} />
 
       <Canvas
-        camera={{ position: [0, 1.5, 4.5], fov: 45 }}
+        camera={{ position: [0, 1.6, 3.8], fov: 42 }}
         dpr={[1, 2]}
-        style={{ position: 'relative', background: 'transparent' }}
+        gl={{ alpha: true, antialias: true }}
+        style={{ background: 'transparent', width: '100%', height: '100%' }}
         aria-label="Interactive 3D avatar character"
       >
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[4, 6, 4]} intensity={1.2} castShadow />
-        <pointLight position={[-3, 3, -2]} intensity={0.6} color="#818cf8" />
-        <pointLight position={[3, 1, 3]} intensity={0.3} color="#fbbf24" />
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[3, 6, 4]} intensity={1.4} castShadow />
+        <pointLight position={[-3, 4, 2]} intensity={0.7} color="#818cf8" />
+        <pointLight position={[3, 0, 3]} intensity={0.3} color="#fbbf24" />
         <Environment preset="city" />
 
         <Suspense fallback={<CanvasLoader />}>
-          <CharacterRig activeSection={activeSection} sectionProgress={sectionProgress} />
+          <CharacterRig
+            activeSection={activeSection}
+            sectionProgress={sectionProgress}
+            forcedAnimation={forcedAnimation}
+          />
         </Suspense>
       </Canvas>
     </div>

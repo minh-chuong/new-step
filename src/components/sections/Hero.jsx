@@ -174,18 +174,19 @@ export function Hero() {
             initial="hidden"
             animate="visible"
             transition={{ delay: 0.2 }}
-            className="relative w-full aspect-square max-w-[540px] mx-auto lg:mx-0"
+            className="relative w-full mx-auto lg:mx-0"
+            style={{ height: 520, maxWidth: 540 }}
           >
-            {/* Outer ambient glow halo */}
+            {/* Subtle ambient glow – NOT a visible box frame */}
             <div
-              className="absolute -inset-6 rounded-[var(--radius-2xl)] pointer-events-none"
+              className="absolute -inset-8 pointer-events-none"
               aria-hidden="true"
               style={{
                 background:
-                  'radial-gradient(ellipse at center, rgba(99,102,241,0.12) 0%, transparent 70%)',
+                  'radial-gradient(ellipse 70% 60% at 50% 60%, rgba(99,102,241,0.13) 0%, transparent 70%)',
               }}
             />
-            {/* Integrated 3D scene */}
+            {/* 3D scene – transparent, no border */}
             <ThreeScene />
           </motion.div>
         </div>
